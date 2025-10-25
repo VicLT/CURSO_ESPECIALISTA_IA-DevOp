@@ -1,0 +1,13 @@
+Vagrant.configure("2") do |config|
+  # Box de Ubuntu 18.04
+  config.vm.box = "ubuntu/bionic64"
+  
+  # Configuración de red privada con IP estática
+  config.vm.network "private_network", ip: "192.168.56.1"
+
+  # Configuración de recursos de hardware
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "2048"    # 2 GB de RAM
+    vb.cpus = 2           # 2 CPUs
+  end
+end
