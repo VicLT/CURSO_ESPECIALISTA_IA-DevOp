@@ -1,0 +1,1 @@
+{"virtualbox":{"/home/vagrant/prueba":{"guestpath":"/home/vagrant/prueba","hostpath":"C:/Users/victo/Downloads","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"C:/PROYECTOS/CURSO_ESPECIALISTA_IA-DevOp/vagrant/05_personalizacion_mv","disabled":false,"__vagrantfile":true}}}
