@@ -1,0 +1,19 @@
+Vagrant.configure("2") do |config|
+  # Variables de entorno
+  is_production = ENV['ENV'] == 'production'
+
+  config.vm.define "app" do |app|
+    app.vm.box = "bento/ubuntu-23.10"
+    app.vm.network "private_network", ip: is_production ? "192.168.50.10" : "192.168.56.2"
+
+    app.vm.provider "virtualbox" do |vb|
+      vb.memory = is_production ? "2048" : "1024" # Más RAM en producción
+      vb.cpus = is_production ? 2 : 1
+    end
+
+    # Provisión condicional
+    app.vm.provision "shell", inline: <<-SHELL
+      echo "Entorno: #{is_production ? 'Producción' : 'Desarrollo'}"
+    SHELL
+  end
+end
