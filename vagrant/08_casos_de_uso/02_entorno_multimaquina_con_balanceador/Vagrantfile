@@ -1,0 +1,128 @@
+Vagrant.configure("2") do |config|
+  # Configuración del balanceador de carga
+  config.vm.define "loadbalancer" do |lb|
+    lb.vm.box = "ubuntu/bionic64"
+    lb.vm.hostname = "load-balancer"
+    lb.vm.network "private_network", ip: "192.168.33.10"
+    
+    lb.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+    
+    # Provisión para instalar y configurar Nginx como balanceador de carga
+    lb.vm.provision "shell", inline: <<-SHELL
+      apt-get update
+      apt-get install -y nginx
+      echo "upstream web_servers {
+        server 192.168.33.11;
+        server 192.168.33.12;
+      }
+      server {
+        listen 80;
+        location / {
+          proxy_pass http://web_servers;
+        }
+      }" > /etc/nginx/sites-available/default
+      systemctl restart nginx
+    SHELL
+  end
+
+  # Configuración del primer servidor web
+  config.vm.define "web1" do |web1|
+    web1.vm.box = "ubuntu/bionic64"
+    web1.vm.hostname = "web-server-1"
+    web1.vm.network "private_network", ip: "192.168.33.11"
+    
+    web1.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+  end
+
+  # Configuración del segundo servidor web
+  config.vm.define "web2" do |web2|
+    web2.vm.box = "ubuntu/bionic64"
+    web2.vm.hostname = "web-server-2"
+    web2.vm.network "private_network", ip: "192.168.33.12"
+    
+    web2.vm.provider "virtualbox" do |vb|
+      vb.memory = "512"
+      vb.cpus = 1
+    end
+  end
+end
+
+=begin
+# VERSIÓN ALTERNATIVA PARA PODER REALIZAR COMPROBACIONES
+Vagrant.configure("2") do |config|
+    # Configuración del balanceador de carga
+    config.vm.define "loadbalancer" do |lb|
+        lb.vm.box = "ubuntu/bionic64"
+        lb.vm.hostname = "load-balancer"
+        lb.vm.network "private_network", ip: "192.168.56.2"
+        
+        lb.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+        end
+        
+        # Provisión para instalar y configurar Nginx como balanceador de carga
+        lb.vm.provision "shell", inline: <<-SHELL
+        apt-get update
+        apt-get install -y nginx
+        echo "upstream web_servers {
+            server 192.168.56.3;
+            server 192.168.56.4;
+        }
+        server {
+            listen 80;
+            location / {
+            proxy_pass http://web_servers;
+            }
+        }" > /etc/nginx/sites-available/default
+        systemctl restart nginx
+        SHELL
+    end
+
+  # Configuración del primer servidor web
+    config.vm.define "web1" do |web1|
+        web1.vm.box = "ubuntu/bionic64"
+        web1.vm.hostname = "web-server-1"
+        web1.vm.network "private_network", ip: "192.168.56.3"
+
+        web1.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+        end
+
+        # Provisión: instalar Nginx y crear página de prueba
+        web1.vm.provision "shell", inline: <<-SHELL
+            apt-get update
+            apt-get install -y nginx
+            echo "Servidor Web 1" | sudo tee /var/www/html/index.html
+            systemctl restart nginx
+        SHELL
+    end
+
+    # Configuración del segundo servidor web
+    config.vm.define "web2" do |web2|
+        web2.vm.box = "ubuntu/bionic64"
+        web2.vm.hostname = "web-server-2"
+        web2.vm.network "private_network", ip: "192.168.56.4"
+
+        web2.vm.provider "virtualbox" do |vb|
+            vb.memory = "512"
+            vb.cpus = 1
+        end
+
+        # Provisión: instalar Nginx y crear página de prueba
+        web2.vm.provision "shell", inline: <<-SHELL
+            apt-get update
+            apt-get install -y nginx
+            echo "Servidor Web 2" | sudo tee /var/www/html/index.html
+            systemctl restart nginx
+        SHELL
+    end
+end
+=end
